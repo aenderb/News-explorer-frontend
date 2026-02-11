@@ -89,7 +89,7 @@ function signin(email: string, password: string): Promise<UserData> {
 }
 
 function signout(): Promise<{ message: string }> {
-  return fetch(`${BASE_URL}/signout`, {
+  return fetch(`${BASE_URL}/logout`, {
     method: "POST",
     credentials: "include",
   }).then((res) => checkResponse<{ message: string }>(res));
