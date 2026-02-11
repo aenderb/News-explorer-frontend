@@ -7,7 +7,7 @@ import LoginPopup from "../LoginPopup/LoginPopup";
 import RegisterPopup from "../RegisterPopup/RegisterPopup";
 import SuccessRegisterPopup from "../SuccessRegisterPopup/SuccessRegisterPopup";
 import SavedNews from "../SavedNews/SavedNews";
-import CurrentUserContext from "../contexts/CurrentUserContext";
+import CurrentUserContext from "../../contexts/CurrentUserContext";
 import searchNews, { Article } from "../../utils/ThirdPartyApi";
 import {
   signup,
@@ -208,7 +208,6 @@ function App() {
                 isLoggedIn={isLoggedIn} 
                 handleSigninClick={handleSigninClick}
                 handleLogout={handleLogout}
-                showingSavedArticles={false}
                 onSearch={handleSearch}
                 onHomeClick={handleGoHome}
               />
@@ -245,25 +244,31 @@ function App() {
         />
       </Routes>
       <Footer />
-      <LoginPopup 
-        isOpen={isLoginPopupOpen} 
-        onClose={handleClosePopup}
-        onLogin={handleLogin}
-        onSwitchToRegister={handleOpenRegister}
-        errorMessage={authError}
-      />
-      <RegisterPopup
-        isOpen={isRegisterPopupOpen}
-        onClose={handleClosePopup}
-        onSwitchToLogin={handleOpenLogin}
-        onRegister={handleRegister}
-        errorMessage={authError}
-      />
-      <SuccessRegisterPopup
-        isOpen={isSuccessPopupOpen}
-        onClose={handleClosePopup}
-        onGoToLogin={handleOpenLogin}
-      />
+      {isLoginPopupOpen && (
+        <LoginPopup 
+          isOpen={isLoginPopupOpen} 
+          onClose={handleClosePopup}
+          onLogin={handleLogin}
+          onSwitchToRegister={handleOpenRegister}
+          errorMessage={authError}
+        />
+      )}
+      {isRegisterPopupOpen && (
+        <RegisterPopup
+          isOpen={isRegisterPopupOpen}
+          onClose={handleClosePopup}
+          onSwitchToLogin={handleOpenLogin}
+          onRegister={handleRegister}
+          errorMessage={authError}
+        />
+      )}
+      {isSuccessPopupOpen && (
+        <SuccessRegisterPopup
+          isOpen={isSuccessPopupOpen}
+          onClose={handleClosePopup}
+          onGoToLogin={handleOpenLogin}
+        />
+      )}
     </div>
     </CurrentUserContext.Provider>
   );

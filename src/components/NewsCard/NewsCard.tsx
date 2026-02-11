@@ -6,9 +6,23 @@ import bookmarknormal from "../../images/bookmark.svg";
 import bookmarkhover from "../../images/bookmark-hover.svg";
 import bookmarkBlue from "../../images/bookmark-blue.svg";
 
+interface NewsCardArticle {
+  title: string;
+  description?: string;
+  content?: string;
+  url: string;
+  urlToImage?: string;
+  image?: string;
+  publishedAt?: string;
+  source?: { id: string | null; name: string };
+  author?: string | null;
+  keyword?: string;
+  _id?: string;
+}
+
 interface NewsCardProps {
-  article: any;
-  isLoggedIn?: boolean;
+  article: NewsCardArticle;
+  isLoggedIn: boolean;
   isSavedPage?: boolean;
   isSaved?: boolean;
   onSaveArticle?: () => void;
@@ -17,7 +31,7 @@ interface NewsCardProps {
 
 function NewsCard({
   article,
-  isLoggedIn = false,
+  isLoggedIn,
   isSavedPage = false,
   isSaved = false,
   onSaveArticle,
@@ -48,9 +62,13 @@ function NewsCard({
   return (
     <article className="relative flex flex-col bg-white rounded-2xl h-full">
       <img
-        src={article.urlToImage || article.image}
+        src={article.urlToImage || article.image || ''}
         alt={article.title}
-        className="w-full h-[196px] md:h-[272px] object-cover rounded-t-2xl"
+        className="w-full h-[196px] md:h-[272px] object-cover rounded-t-2xl bg-[#f5f6f7]"
+        onError={(e) => {
+          e.currentTarget.src = '';
+          e.currentTarget.alt = 'Imagem indisponível';
+        }}
       />
       <div className="p-4 md:p-6 flex-1 flex flex-col">
         <p className="font-roboto font-normal text-base md:text-lg leading-6 text-[#b6bcbf] m-0 mb-3">

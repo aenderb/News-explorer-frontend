@@ -3,13 +3,13 @@ import { Link } from "react-router-dom";
 import logoutIcon from "../../images/logout.svg";
 import logoutWhiteIcon from "../../images/logout-white.svg";
 import closeButton from "../../images/close.svg";
-import CurrentUserContext from "../contexts/CurrentUserContext";
+import CurrentUserContext from "../../contexts/CurrentUserContext";
 
 interface NavigationProps {
-  isLoggedIn?: boolean;
+  isLoggedIn: boolean;
   variant?: 'default' | 'saved';
-  handleSigninClick?: () => void;
-  handleLogout?: () => void;
+  handleSigninClick: () => void;
+  handleLogout: () => void;
   onHomeClick?: () => void;
 }
 
@@ -84,10 +84,11 @@ function Navigation({ isLoggedIn, variant = 'default', handleSigninClick, handle
           {isLoggedIn ? (
             <button
               onClick={handleLogout}
-              className={`flex items-center gap-3 md:gap-4 h-10 md:h-12 border ${buttonBorder} rounded-full ${textColor} ${buttonHoverBg} transition-colors px-4 md:px-6 text-base md:text-lg`}
+              className={`group flex items-center gap-3 md:gap-4 h-10 md:h-12 border ${buttonBorder} rounded-full ${textColor} ${buttonHoverBg} transition-colors px-4 md:px-6 text-base md:text-lg`}
             >
               {userName}
-              <img src={isDark ? logoutWhiteIcon : logoutIcon} alt="Sair" className="w-6 h-6" />
+              <img src={isDark ? logoutWhiteIcon : logoutIcon} alt="Sair" className="w-6 h-6 group-hover:hidden" />
+              <img src={isDark ? logoutIcon : logoutWhiteIcon} alt="Sair" className="w-6 h-6 hidden group-hover:block" />
             </button>
           ) : (
             <button 
@@ -149,7 +150,7 @@ function Navigation({ isLoggedIn, variant = 'default', handleSigninClick, handle
               <li>
                 {isLoggedIn ? (
                   <button
-                    onClick={() => { handleLogout?.(); handleCloseMenu(); }}
+                    onClick={() => { handleLogout(); handleCloseMenu(); }}
                     className="flex items-center gap-3 h-10 border border-white rounded-full text-white transition-colors px-4 text-base"
                   >
                     {userName}
@@ -158,7 +159,7 @@ function Navigation({ isLoggedIn, variant = 'default', handleSigninClick, handle
                 ) : (
                   <button
                     onClick={() => {
-                      handleSigninClick?.();
+                      handleSigninClick();
                       handleCloseMenu();
                     }}
                     className="w-full h-10 border border-white rounded-full text-white transition-colors text-base"

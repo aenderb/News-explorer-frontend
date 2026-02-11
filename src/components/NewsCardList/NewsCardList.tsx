@@ -4,21 +4,21 @@ import { Article } from "../../utils/ThirdPartyApi";
 import type { ArticleData } from "../../utils/MainApi";
 
 interface NewsCardListProps {
-  isLoggedIn?: boolean;
-  articles?: Article[];
-  hasMore?: boolean;
-  onLoadMore?: () => void;
-  savedArticles?: ArticleData[];
-  onSaveArticle?: (article: Article) => void;
-  onDeleteArticle?: (articleId: string) => void;
+  isLoggedIn: boolean;
+  articles: Article[];
+  hasMore: boolean;
+  onLoadMore: () => void;
+  savedArticles: ArticleData[];
+  onSaveArticle: (article: Article) => void;
+  onDeleteArticle: (articleId: string) => void;
 }
 
 function NewsCardList({
-  isLoggedIn = false,
-  articles = [],
-  hasMore = false,
+  isLoggedIn,
+  articles,
+  hasMore,
   onLoadMore,
-  savedArticles = [],
+  savedArticles,
   onSaveArticle,
   onDeleteArticle,
 }: NewsCardListProps) {
@@ -49,7 +49,7 @@ function NewsCardList({
       </ul>
         
      
-      {hasMore && onLoadMore && (
+      {hasMore && (
         <div className="text-center">
           <button 
             onClick={onLoadMore} 

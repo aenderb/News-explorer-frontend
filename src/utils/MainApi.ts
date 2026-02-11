@@ -30,17 +30,21 @@ function checkResponse<T>(res: Response): Promise<T> {
   if (res.ok) {
     return res.json();
   }
-  return res.json().then((err) => {
-    throw new Error(err.message || `Erro: ${res.status}`);
-  });
+  return res
+    .json()
+    .catch(() => ({ message: `Erro: ${res.status}` }))
+    .then((err) => {
+      throw new Error(err.message || `Erro: ${res.status}`);
+    });
 }
 
 /**
  * Wrapper de fetch autenticado.
  * Envia cookies automaticamente (credentials: "include").
  * Se a resposta for 401, tenta renovar o token via /refresh e refaz a requisição original.
+ * Usa flag _isRetry para evitar loop infinito caso o refresh também falhe.
  */
-function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
+function authFetch(url: string, options: RequestInit = {}, _isRetry = false): Promise<Response> {
   const opts: RequestInit = {
     ...options,
     credentials: "include",
@@ -51,7 +55,7 @@ function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
   };
 
   return fetch(url, opts).then((res) => {
-    if (res.status === 401) {
+    if (res.status === 401 && !_isRetry) {
       // Tenta refresh e refaz a requisição original
       return fetch(`${BASE_URL}/refresh`, {
         method: "POST",
@@ -60,8 +64,8 @@ function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
         if (!refreshRes.ok) {
           throw new Error("Sessão expirada");
         }
-        // Refaz a requisição original com o novo cookie
-        return fetch(url, opts);
+        // Refaz a requisição original com o novo cookie (marcando como retry)
+        return authFetch(url, options, true);
       });
     }
     return res;

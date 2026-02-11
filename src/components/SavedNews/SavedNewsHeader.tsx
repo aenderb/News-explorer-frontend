@@ -1,11 +1,11 @@
 import Navigation from "../Navigation/Navigation";
 
 interface SavedNewsHeaderProps {
-  handleLogout?: () => void;
-  handleSigninClick?: () => void;
-  isLoggedIn?: boolean;
-  savedArticlesCount?: number;
-  keywords?: string[];
+  handleLogout: () => void;
+  handleSigninClick: () => void;
+  isLoggedIn: boolean;
+  savedArticlesCount: number;
+  keywords: string[];
   userName?: string;
 }
 
@@ -13,8 +13,8 @@ function SavedNewsHeader({
   handleLogout,
   handleSigninClick,
   isLoggedIn,
-  savedArticlesCount = 0,
-  keywords = [],
+  savedArticlesCount,
+  keywords,
   userName,
 }: SavedNewsHeaderProps) {
   const getKeywordsText = () => {

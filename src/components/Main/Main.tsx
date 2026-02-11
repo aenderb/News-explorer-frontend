@@ -7,18 +7,18 @@ import { Article } from "../../utils/ThirdPartyApi";
 import type { ArticleData } from "../../utils/MainApi";
 
 interface MainProps {
-  isLoggedIn?: boolean;
-  showingSavedArticles?: boolean;
-  articles?: Article[];
-  isLoading?: boolean;
-  hasSearched?: boolean;
-  hasMore?: boolean;
-  onLoadMore?: () => void;
-  hasError?: boolean;
-  errorMessage?: string;
-  savedArticles?: ArticleData[];
-  onSaveArticle?: (article: Article) => void;
-  onDeleteArticle?: (articleId: string) => void;
+  isLoggedIn: boolean;
+  showingSavedArticles: boolean;
+  articles: Article[];
+  isLoading: boolean;
+  hasSearched: boolean;
+  hasMore: boolean;
+  onLoadMore: () => void;
+  hasError: boolean;
+  errorMessage: string;
+  savedArticles: ArticleData[];
+  onSaveArticle: (article: Article) => void;
+  onDeleteArticle: (articleId: string) => void;
 }
 
 function Main({

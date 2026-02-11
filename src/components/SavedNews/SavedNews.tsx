@@ -1,22 +1,22 @@
 import { useContext } from "react";
 import SavedNewsHeader from "./SavedNewsHeader";
 import NewsCard from "../NewsCard/NewsCard";
-import CurrentUserContext from "../contexts/CurrentUserContext";
+import CurrentUserContext from "../../contexts/CurrentUserContext";
 import type { ArticleData } from "../../utils/MainApi";
 
 interface SavedNewsProps {
-  handleLogout?: () => void;
-  handleSigninClick?: () => void;
-  isLoggedIn?: boolean;
-  savedArticles?: ArticleData[];
-  onDeleteArticle?: (articleId: string) => void;
+  handleLogout: () => void;
+  handleSigninClick: () => void;
+  isLoggedIn: boolean;
+  savedArticles: ArticleData[];
+  onDeleteArticle: (articleId: string) => void;
 }
 
 function SavedNews({
   handleLogout,
   handleSigninClick,
   isLoggedIn,
-  savedArticles = [],
+  savedArticles,
   onDeleteArticle,
 }: SavedNewsProps) {
   const { currentUser } = useContext(CurrentUserContext);
