@@ -29,6 +29,7 @@ function Header({ onSearch, handleLogout, handleSigninClick, isLoggedIn, variant
         isLoggedIn={isLoggedIn} 
         variant={effectiveVariant} 
         handleSigninClick={handleSigninClick}
+        handleLogout={handleLogout}
         onHomeClick={onHomeClick}
       />
       {!isShowingSaved ? (

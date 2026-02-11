@@ -6,6 +6,7 @@ interface SavedNewsHeaderProps {
   isLoggedIn?: boolean;
   savedArticlesCount?: number;
   keywords?: string[];
+  userName?: string;
 }
 
 function SavedNewsHeader({
@@ -14,6 +15,7 @@ function SavedNewsHeader({
   isLoggedIn,
   savedArticlesCount = 0,
   keywords = [],
+  userName,
 }: SavedNewsHeaderProps) {
   const getKeywordsText = () => {
     if (keywords.length === 0) return "";
@@ -24,13 +26,13 @@ function SavedNewsHeader({
 
   return (
     <div className="max-w-container w-full mx-auto bg-white">
-      <Navigation isLoggedIn={isLoggedIn} variant="saved" />
+      <Navigation isLoggedIn={isLoggedIn} variant="saved" handleLogout={handleLogout} handleSigninClick={handleSigninClick} />
       <div className="w-full px-4 md:px-10 lg:px-[104px] pt-8 md:pt-10 pb-10 md:pb-[60px]">
         <p className="font-roboto text-[#1a1b22]/50 text-base md:text-lg leading-6 m-0 mb-6 md:mb-[29px]">
           Artigos salvos
         </p>
         <h1 className="font-roboto-slab font-normal text-[32px] md:text-[40px] leading-[36px] md:leading-[46px] text-[#1a1b22] m-0 mb-6 md:mb-[30px]">
-          {isLoggedIn ? "Elise" : "Visitante"}, você tem {savedArticlesCount}{" "}
+          {isLoggedIn ? (userName || "Usuário") : "Visitante"}, você tem {savedArticlesCount}{" "}
           artigos salvos
         </h1>
         {keywords.length > 0 && (

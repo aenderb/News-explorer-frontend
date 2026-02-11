@@ -6,9 +6,10 @@ interface LoginPopupProps {
   onClose: () => void;
   onLogin?: (email: string, password: string) => void;
   onSwitchToRegister?: () => void;
+  errorMessage?: string;
 }
 
-function LoginPopup({ isOpen, onClose, onLogin, onSwitchToRegister }: LoginPopupProps) {
+function LoginPopup({ isOpen, onClose, onLogin, onSwitchToRegister, errorMessage }: LoginPopupProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -66,6 +67,12 @@ function LoginPopup({ isOpen, onClose, onLogin, onSwitchToRegister }: LoginPopup
             </p>
           )}
         </div>
+
+        {errorMessage && (
+          <p className="mb-4 text-xs text-red-500 font-inter text-center">
+            {errorMessage}
+          </p>
+        )}
 
         <button
           type="submit"

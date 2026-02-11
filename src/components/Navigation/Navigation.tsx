@@ -1,16 +1,21 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import logoutIcon from "../../images/logout.svg";
+import logoutWhiteIcon from "../../images/logout-white.svg";
 import closeButton from "../../images/close.svg";
+import CurrentUserContext from "../contexts/CurrentUserContext";
 
 interface NavigationProps {
   isLoggedIn?: boolean;
   variant?: 'default' | 'saved';
   handleSigninClick?: () => void;
+  handleLogout?: () => void;
   onHomeClick?: () => void;
 }
 
-function Navigation({ isLoggedIn, variant = 'default', handleSigninClick, onHomeClick }: NavigationProps) {
+function Navigation({ isLoggedIn, variant = 'default', handleSigninClick, handleLogout, onHomeClick }: NavigationProps) {
+  const { currentUser } = useContext(CurrentUserContext);
+  const userName = currentUser?.name || "Usuário";
   const [isMenuOpen, setIsMenuOpen] = useState(false);
  
   
@@ -77,9 +82,12 @@ function Navigation({ isLoggedIn, variant = 'default', handleSigninClick, onHome
         )}
         <li>
           {isLoggedIn ? (
-            <button className={`flex items-center gap-3 md:gap-4 h-10 md:h-12 border ${buttonBorder} rounded-full ${textColor} ${buttonHoverBg} transition-colors px-4 md:px-6 text-base md:text-lg`}>
-              Elise
-              <img src={logoutIcon} alt="Sair" className="w-6 h-6" />
+            <button
+              onClick={handleLogout}
+              className={`flex items-center gap-3 md:gap-4 h-10 md:h-12 border ${buttonBorder} rounded-full ${textColor} ${buttonHoverBg} transition-colors px-4 md:px-6 text-base md:text-lg`}
+            >
+              {userName}
+              <img src={isDark ? logoutWhiteIcon : logoutIcon} alt="Sair" className="w-6 h-6" />
             </button>
           ) : (
             <button 
@@ -93,7 +101,7 @@ function Navigation({ isLoggedIn, variant = 'default', handleSigninClick, onHome
       </ul>
       {isMenuOpen && (
         <div className="md:hidden fixed inset-0 bg-black/50 z-50">
-          <div className="bg-[#1a1b22] w-full px-4 pt-6 pb-8">
+          <div className="bg-[#1a1b22] w-full px-4 pt-5 pb-4">
             <div className="flex items-center justify-between">
               <Link
                 to="/"
@@ -114,7 +122,7 @@ function Navigation({ isLoggedIn, variant = 'default', handleSigninClick, onHome
                 <img src={closeButton} alt="Fechar menu" className="w-6 h-6" />
               </button>
             </div>
-            <ul className="flex flex-col gap-6 font-roboto-slab font-medium text-lg leading-6 text-white list-none m-0 mt-6 p-0">
+            <ul className="flex flex-col gap-6 font-roboto-slab font-medium text-lg leading-6 text-white list-none m-0 mt-4 pt-4 p-0 border-t border-[#D1D2D6]">
               <li>
                 <Link
                   to="/"
@@ -140,9 +148,12 @@ function Navigation({ isLoggedIn, variant = 'default', handleSigninClick, onHome
               )}
               <li>
                 {isLoggedIn ? (
-                  <button className="flex items-center gap-3 h-10 border border-white rounded-full text-white transition-colors px-4 text-base">
-                    Elise
-                    <img src={logoutIcon} alt="Sair" className="w-6 h-6" />
+                  <button
+                    onClick={() => { handleLogout?.(); handleCloseMenu(); }}
+                    className="flex items-center gap-3 h-10 border border-white rounded-full text-white transition-colors px-4 text-base"
+                  >
+                    {userName}
+                    <img src={logoutWhiteIcon} alt="Sair" className="w-6 h-6" />
                   </button>
                 ) : (
                   <button

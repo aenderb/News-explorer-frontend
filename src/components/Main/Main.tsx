@@ -4,6 +4,7 @@ import NewsCardList from "../NewsCardList/NewsCardList";
 import NotFound from "../NotFound/NotFound";
 import Preloader from "../Preloader/Preloader";
 import { Article } from "../../utils/ThirdPartyApi";
+import type { ArticleData } from "../../utils/MainApi";
 
 interface MainProps {
   isLoggedIn?: boolean;
@@ -16,6 +17,9 @@ interface MainProps {
   isLoadingMore?: boolean;
   hasError?: boolean;
   errorMessage?: string;
+  savedArticles?: ArticleData[];
+  onSaveArticle?: (article: Article) => void;
+  onDeleteArticle?: (articleId: string) => void;
 }
 
 function Main({
@@ -29,6 +33,9 @@ function Main({
   isLoadingMore,
   hasError,
   errorMessage,
+  savedArticles,
+  onSaveArticle,
+  onDeleteArticle,
 }: MainProps) {
   const hasArticles = Boolean(articles && articles.length > 0);
   const showNotFound = Boolean(hasSearched && !isLoading && !hasArticles && !showingSavedArticles);
@@ -51,6 +58,9 @@ function Main({
             hasMore={hasMore}
             onLoadMore={onLoadMore}
             isLoadingMore={isLoadingMore}
+            savedArticles={savedArticles}
+            onSaveArticle={onSaveArticle}
+            onDeleteArticle={onDeleteArticle}
           />
         )}
 

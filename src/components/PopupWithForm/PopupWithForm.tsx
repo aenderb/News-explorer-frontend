@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import closeButton from "../../images/close.svg";
 
 interface PopupWithFormProps {
@@ -9,6 +9,15 @@ interface PopupWithFormProps {
 }
 
 function PopupWithForm({ title, isOpen, onClose, children }: PopupWithFormProps) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (

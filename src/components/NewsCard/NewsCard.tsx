@@ -6,12 +6,25 @@ import bookmarknormal from "../../images/bookmark.svg";
 import bookmarkhover from "../../images/bookmark-hover.svg";
 import bookmarkBlue from "../../images/bookmark-blue.svg";
 
+interface NewsCardProps {
+  article: any;
+  isLoggedIn?: boolean;
+  isSavedPage?: boolean;
+  isSaved?: boolean;
+  onSaveArticle?: () => void;
+  onDeleteArticle?: () => void;
+}
 
-function NewsCard({ article, isLoggedIn = false }: { article: any; isLoggedIn?: boolean }) {
-
-  const [isSaved, setIsSaved] = useState(false);
+function NewsCard({
+  article,
+  isLoggedIn = false,
+  isSavedPage = false,
+  isSaved = false,
+  onSaveArticle,
+  onDeleteArticle,
+}: NewsCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const isSaveArticles = false; // Mockando estado de artigos salvos - substituir por estado real
+  const [isDeleteHovered, setIsDeleteHovered] = useState(false);
 
   // Formatar data
   const formatDate = (dateString: string) => {
@@ -21,6 +34,15 @@ function NewsCard({ article, isLoggedIn = false }: { article: any; isLoggedIn?: 
       month: 'long', 
       year: 'numeric' 
     });
+  };
+
+  const handleBookmarkClick = () => {
+    if (!isLoggedIn) return;
+    if (isSaved) {
+      onDeleteArticle?.();
+    } else {
+      onSaveArticle?.();
+    }
   };
 
   return (
@@ -43,44 +65,48 @@ function NewsCard({ article, isLoggedIn = false }: { article: any; isLoggedIn?: 
         <p className="font-roboto-slab font-bold text-sm md:text-base leading-5 uppercase text-[#b6bcbf] overflow-hidden text-ellipsis m-0 mt-auto">
           {article.source?.name || article.author || ''}
         </p>
-        <button
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          className="absolute top-[10px] right-[10px] bg-white border-none w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer disabled:cursor-not-allowed"
-        >
-          <img
-            className="cursor-pointer"
-            src={isSaved ? bookmarkBlue : isHovered ? bookmarkhover : bookmarknormal}
-            alt="Salvar artigo"
-          />
-          {isHovered && !isLoggedIn && (
-            <span className="absolute top-0 right-[45px] w-40 h-10 flex items-center px-4 text-xs font-roboto font-medium text-left rounded-lg bg-white shadow-md z-10">
-              Faça o login para salvar
-            </span>
-          )}
-        </button>
-        {isSaveArticles && (
+
+        {isSavedPage ? (
           <>
             <p className="absolute top-[10px] left-[10px] py-[11px] px-5 m-0 text-sm font-roboto font-medium rounded-2xl bg-white text-black">
               {article.keyword}
             </p>
             <button
+              onMouseEnter={() => setIsDeleteHovered(true)}
+              onMouseLeave={() => setIsDeleteHovered(false)}
+              onClick={onDeleteArticle}
               className="absolute top-[10px] right-[10px] bg-white border-none w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer"
             >
               <img
                 className="cursor-pointer"
-                src={isHovered ? deleteButtonHover : deleteButtonDefault}
+                src={isDeleteHovered ? deleteButtonHover : deleteButtonDefault}
                 alt="Remover artigo"
               />
-              {isHovered && isLoggedIn && (
+              {isDeleteHovered && (
                 <span className="absolute top-0 right-[50px] py-[11px] px-5 text-xs font-roboto font-medium rounded-2xl w-[182px] bg-white transition-opacity duration-600 z-10">
-                  {isLoggedIn
-                ? "Remove saved article"
-                : "Sign in to delete articles"}
+                  Remover artigo salvo
                 </span>
               )}
             </button>
           </>
+        ) : (
+          <button
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            onClick={handleBookmarkClick}
+            className="absolute top-[10px] right-[10px] bg-white border-none w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer disabled:cursor-not-allowed"
+          >
+            <img
+              className="cursor-pointer"
+              src={isSaved ? bookmarkBlue : isHovered ? bookmarkhover : bookmarknormal}
+              alt="Salvar artigo"
+            />
+            {isHovered && !isLoggedIn && (
+              <span className="absolute top-0 right-[45px] w-40 h-10 flex items-center px-4 text-xs font-roboto font-medium text-left rounded-lg bg-white shadow-md z-10">
+                Faça o login para salvar
+              </span>
+            )}
+          </button>
         )}
       </div>
     </article>
