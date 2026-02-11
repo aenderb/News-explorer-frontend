@@ -20,8 +20,7 @@ import {
 } from "../../utils/MainApi";
 import type { UserData, ArticleData } from "../../utils/MainApi";
 
-const PAGE_SIZE = 3;
-const MAX_PAGES_PER_CLICK = 3;
+const CARDS_PER_PAGE = 3;
 
 function App() {
   const [currentUser, setCurrentUser] = useState<UserData | null>(null);
@@ -29,15 +28,13 @@ function App() {
   const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
   const [isRegisterPopupOpen, setIsRegisterPopupOpen] = useState(false);
   const [isSuccessPopupOpen, setIsSuccessPopupOpen] = useState(false);
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [allArticles, setAllArticles] = useState<Article[]>([]);
+  const [visibleCount, setVisibleCount] = useState(CARDS_PER_PAGE);
   const [savedArticles, setSavedArticles] = useState<ArticleData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [totalResults, setTotalResults] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
   const [currentQuery, setCurrentQuery] = useState("");
   const [authError, setAuthError] = useState("");
 
@@ -68,54 +65,7 @@ function App() {
     }
   }, [isLoggedIn, fetchSavedArticles]);
 
-  const loadChunk = (
-    query: string,
-    startPage: number,
-    existing: Article[],
-    existingTotal: number
-  ): Promise<{ combined: Article[]; page: number; total: number }> => {
-    let page = startPage;
-    let total = existingTotal;
-    const combined = [...existing];
-    const seen = new Set(existing.map((article) => article.url));
-    let added = 0;
-    let pagesFetched = 0;
 
-    const fetchNext = (): Promise<{ combined: Article[]; page: number; total: number }> => {
-      if (added >= PAGE_SIZE || pagesFetched >= MAX_PAGES_PER_CLICK) {
-        return Promise.resolve({ combined, page, total });
-      }
-      if (total !== 0 && combined.length >= total) {
-        return Promise.resolve({ combined, page, total });
-      }
-
-      return searchNews(query, page, PAGE_SIZE).then((data) => {
-        pagesFetched += 1;
-        total = data.totalResults;
-
-        if (data.articles.length === 0) {
-          return { combined, page, total };
-        }
-
-        for (const article of data.articles) {
-          if (!seen.has(article.url)) {
-            combined.push(article);
-            seen.add(article.url);
-            added += 1;
-            if (added >= PAGE_SIZE) break;
-          }
-        }
-
-        if (added < PAGE_SIZE) {
-          page += 1;
-        }
-
-        return fetchNext();
-      });
-    };
-
-    return fetchNext();
-  };
   
   const handleSigninClick = () => {
     setAuthError("");
@@ -123,15 +73,13 @@ function App() {
   };
 
   const handleGoHome = () => {
-    setArticles([]);
+    setAllArticles([]);
+    setVisibleCount(CARDS_PER_PAGE);
     setHasSearched(false);
     setHasError(false);
     setErrorMessage("");
-    setTotalResults(0);
-    setCurrentPage(1);
     setCurrentQuery("");
     setIsLoading(false);
-    setIsLoadingMore(false);
   };
 
   const handleOpenRegister = () => {
@@ -223,16 +171,13 @@ function App() {
     setHasError(false);
     setErrorMessage("");
     setIsLoading(true);
-    setIsLoadingMore(false);
     setCurrentQuery(query);
-    setCurrentPage(1);
-    setArticles([]);
+    setAllArticles([]);
+    setVisibleCount(CARDS_PER_PAGE);
 
-    loadChunk(query, 1, [], 0)
-      .then((filled) => {
-        setArticles(filled.combined);
-        setTotalResults(filled.total);
-        setCurrentPage(filled.page);
+    searchNews(query)
+      .then((data) => {
+        setAllArticles(data.articles);
       })
       .catch((error) => {
         const message = error instanceof Error ? error.message : "Erro ao buscar noticias.";
@@ -245,27 +190,11 @@ function App() {
   };
 
   const handleLoadMore = () => {
-    if (isLoadingMore || !currentQuery) return;
-    setIsLoadingMore(true);
-    const nextPage = currentPage + 1;
-
-    loadChunk(currentQuery, nextPage, articles, totalResults)
-      .then((filled) => {
-        setArticles(filled.combined);
-        setCurrentPage(filled.page);
-        setTotalResults(filled.total);
-      })
-      .catch((error) => {
-        const message = error instanceof Error ? error.message : "Erro ao carregar mais noticias.";
-        setHasError(true);
-        setErrorMessage(message);
-      })
-      .finally(() => {
-        setIsLoadingMore(false);
-      });
+    setVisibleCount((prev) => prev + CARDS_PER_PAGE);
   };
 
-  const hasMore = articles.length < totalResults;
+  const articles = allArticles.slice(0, visibleCount);
+  const hasMore = visibleCount < allArticles.length;
   
   return (
     <CurrentUserContext.Provider value={{ currentUser, isLoggedIn }}>
@@ -291,7 +220,6 @@ function App() {
                 hasSearched={hasSearched}
                 hasMore={hasMore}
                 onLoadMore={handleLoadMore}
-                isLoadingMore={isLoadingMore}
                 hasError={hasError}
                 errorMessage={errorMessage}
                 savedArticles={savedArticles}

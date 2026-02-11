@@ -14,7 +14,6 @@ interface MainProps {
   hasSearched?: boolean;
   hasMore?: boolean;
   onLoadMore?: () => void;
-  isLoadingMore?: boolean;
   hasError?: boolean;
   errorMessage?: string;
   savedArticles?: ArticleData[];
@@ -30,7 +29,6 @@ function Main({
   hasSearched,
   hasMore,
   onLoadMore,
-  isLoadingMore,
   hasError,
   errorMessage,
   savedArticles,
@@ -57,7 +55,6 @@ function Main({
             articles={articles}
             hasMore={hasMore}
             onLoadMore={onLoadMore}
-            isLoadingMore={isLoadingMore}
             savedArticles={savedArticles}
             onSaveArticle={onSaveArticle}
             onDeleteArticle={onDeleteArticle}

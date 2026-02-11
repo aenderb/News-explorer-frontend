@@ -8,7 +8,6 @@ interface NewsCardListProps {
   articles?: Article[];
   hasMore?: boolean;
   onLoadMore?: () => void;
-  isLoadingMore?: boolean;
   savedArticles?: ArticleData[];
   onSaveArticle?: (article: Article) => void;
   onDeleteArticle?: (articleId: string) => void;
@@ -19,7 +18,6 @@ function NewsCardList({
   articles = [],
   hasMore = false,
   onLoadMore,
-  isLoadingMore = false,
   savedArticles = [],
   onSaveArticle,
   onDeleteArticle,
@@ -55,10 +53,9 @@ function NewsCardList({
         <div className="text-center">
           <button 
             onClick={onLoadMore} 
-            disabled={isLoadingMore}
-            className="font-roboto font-medium text-base md:text-lg leading-6 text-[#1a1b22] py-4 md:py-5 px-10 md:px-[99px] bg-[#e8e8e8] border-none rounded-[80px] mt-10 md:mt-14 hover:bg-white cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+            className="font-roboto font-medium text-base md:text-lg leading-6 text-[#1a1b22] py-4 md:py-5 px-10 md:px-[99px] bg-[#e8e8e8] border-none rounded-[80px] mt-10 md:mt-14 hover:bg-white cursor-pointer transition-colors"
           >
-            {isLoadingMore ? "Carregando..." : "Mostrar mais"}
+            Mostrar mais
           </button>
         </div>
       )}

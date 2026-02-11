@@ -1,5 +1,4 @@
-const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
-const BASE_URL = import.meta.env.VITE_NEWS_API_BASE_URL || "/api/news";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 interface Article {
   source: {
@@ -21,11 +20,8 @@ interface NewsApiResponse {
   articles: Article[];
 }
 
-function searchNews(query: string, page = 1, pageSize = 3): Promise<NewsApiResponse> {
-  if (!API_KEY) {
-    return Promise.reject(new Error("VITE_NEWS_API_KEY nao configurada."));
-  }
-  const url = `${BASE_URL}?q=${encodeURIComponent(query)}&apiKey=${API_KEY}&language=pt&pageSize=${pageSize}&page=${page}`;
+function searchNews(query: string, pageSize = 100): Promise<NewsApiResponse> {
+  const url = `${BASE_URL}/news?q=${encodeURIComponent(query)}&language=pt&pageSize=${pageSize}&page=1`;
 
   return fetch(url)
     .then((response) => {
