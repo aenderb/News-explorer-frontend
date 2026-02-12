@@ -2,6 +2,8 @@
 
 Projeto de frontend para o News Explorer, desenvolvido em React + TypeScript, com Vite e Tailwind CSS. Permite buscar notícias em tempo real, visualizar resultados paginados, salvar artigos favoritos e gerenciar autenticação via cookies httpOnly com refresh token.
 
+**Produção:** [https://news-explorer-frontend-beta.vercel.app/](https://news-explorer-frontend-beta.vercel.app/)
+
 ## Funcionalidades
 
 - Busca de notícias em tempo real via NewsAPI (com paginação de 3 em 3)
@@ -35,14 +37,9 @@ Projeto de frontend para o News Explorer, desenvolvido em React + TypeScript, co
 3. **Configure as variáveis de ambiente:**
    Crie um arquivo `.env` na raiz com:
    ```env
-   VITE_API_BASE_URL=http://localhost:3000
-   VITE_NEWS_API_KEY=<sua_api_key>
-   VITE_NEWS_API_BASE_URL=https://newsapi.org/v2/everything
+   VITE_API_BASE_URL=http://localhost:3000/api
    ```
-   - `VITE_API_BASE_URL` — URL do backend (API própria)
-   - `VITE_NEWS_API_KEY` — Chave de acesso da [NewsAPI](https://newsapi.org/)
-   - `VITE_NEWS_API_BASE_URL` — URL base da NewsAPI
-
+   - `VITE_API_BASE_URL` — URL do backend (API própria, com prefixo `/api`)
 4. **Inicie o servidor de desenvolvimento:**
    ```bash
    npm run dev
@@ -62,16 +59,17 @@ A autenticação utiliza **cookies httpOnly** gerenciados pelo backend, sem arma
 
 ### Endpoints esperados no backend
 
-| Método | Rota           | Descrição                                |
-|--------|----------------|------------------------------------------|
-| POST   | `/signup`      | Cadastro de novo usuário                 |
-| POST   | `/signin`      | Login (seta cookies httpOnly)            |
-| POST   | `/signout`     | Logout (limpa cookies)                   |
-| POST   | `/refresh`     | Renova o JWT via refresh token           |
-| GET    | `/users/me`    | Retorna dados do usuário logado          |
-| GET    | `/articles`    | Lista artigos salvos do usuário          |
-| POST   | `/articles`    | Salva um novo artigo                     |
-| DELETE | `/articles/:id`| Remove um artigo salvo                   |
+| Método | Rota               | Descrição                                |
+|--------|---------------------|------------------------------------------|
+| POST   | `/api/signup`       | Cadastro de novo usuário                 |
+| POST   | `/api/signin`       | Login (seta cookies httpOnly)            |
+| POST   | `/api/logout`       | Logout (limpa cookies)                   |
+| POST   | `/api/refresh`      | Renova o JWT via refresh token           |
+| GET    | `/api/users/me`     | Retorna dados do usuário logado          |
+| GET    | `/api/articles`     | Lista artigos salvos do usuário          |
+| POST   | `/api/articles`     | Salva um novo artigo                     |
+| DELETE | `/api/articles/:id` | Remove um artigo salvo                   |
+| GET    | `/api/news`         | Buscar notícias externas                 |
 
 ## Estrutura de Pastas
 
