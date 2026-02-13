@@ -6,9 +6,10 @@ interface RegisterPopupProps {
   onClose: () => void;
   onRegister?: (email: string, password: string, username: string) => void;
   onSwitchToLogin?: () => void;
+  errorMessage?: string;
 }
 
-function RegisterPopup({ isOpen, onClose, onRegister, onSwitchToLogin }: RegisterPopupProps) {
+function RegisterPopup({ isOpen, onClose, onRegister, onSwitchToLogin, errorMessage }: RegisterPopupProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
@@ -88,6 +89,12 @@ function RegisterPopup({ isOpen, onClose, onRegister, onSwitchToLogin }: Registe
             </p>
           )}
         </div>
+
+        {errorMessage && (
+          <p className="mb-4 text-xs text-red-500 font-inter text-center">
+            {errorMessage}
+          </p>
+        )}
 
         <button
           type="submit"

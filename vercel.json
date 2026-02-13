@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://news-explorer-backend-hzms.onrender.com/api/:path*"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

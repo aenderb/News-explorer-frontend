@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import Main from "../Main/Main";
@@ -7,158 +7,197 @@ import LoginPopup from "../LoginPopup/LoginPopup";
 import RegisterPopup from "../RegisterPopup/RegisterPopup";
 import SuccessRegisterPopup from "../SuccessRegisterPopup/SuccessRegisterPopup";
 import SavedNews from "../SavedNews/SavedNews";
+import CurrentUserContext from "../../contexts/CurrentUserContext";
 import searchNews, { Article } from "../../utils/ThirdPartyApi";
+import {
+  signup,
+  signin,
+  signout,
+  getUserInfo,
+  getSavedArticles,
+  saveArticle,
+  deleteArticle,
+} from "../../utils/MainApi";
+import type { UserData, ArticleData } from "../../utils/MainApi";
 
-const PAGE_SIZE = 3;
-const MAX_PAGES_PER_CLICK = 3;
+const CARDS_PER_PAGE = 3;
 
 function App() {
-  const isLoggedIn = false; // somente para mockar estado de login - substituir por estado real
+  const [currentUser, setCurrentUser] = useState<UserData | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
   const [isRegisterPopupOpen, setIsRegisterPopupOpen] = useState(false);
   const [isSuccessPopupOpen, setIsSuccessPopupOpen] = useState(false);
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [allArticles, setAllArticles] = useState<Article[]>([]);
+  const [visibleCount, setVisibleCount] = useState(CARDS_PER_PAGE);
+  const [savedArticles, setSavedArticles] = useState<ArticleData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [totalResults, setTotalResults] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
   const [currentQuery, setCurrentQuery] = useState("");
+  const [authError, setAuthError] = useState("");
 
-  const loadChunk = async (
-    query: string,
-    startPage: number,
-    existing: Article[],
-    existingTotal: number
-  ) => {
-    let page = startPage;
-    let total = existingTotal;
-    const combined = [...existing];
-    const seen = new Set(existing.map((article) => article.url));
-    let added = 0;
-    let pagesFetched = 0;
+  // ─── Verificar sessão ao montar (cookie httpOnly) ───
+  useEffect(() => {
+    getUserInfo()
+      .then((user) => {
+        setCurrentUser(user);
+        setIsLoggedIn(true);
+      })
+      .catch(() => {
+        // Cookie ausente ou expirado — usuário não logado
+      });
+  }, []);
 
-    while (added < PAGE_SIZE && (total === 0 || combined.length < total)) {
-      if (pagesFetched >= MAX_PAGES_PER_CLICK) {
-        break;
-      }
-      const data = await searchNews(query, page, PAGE_SIZE);
-      pagesFetched += 1;
-      total = data.totalResults;
+  // ─── Carregar artigos salvos quando logado ───
+  const fetchSavedArticles = useCallback(() => {
+    getSavedArticles()
+      .then((articles) => setSavedArticles(articles))
+      .catch((err) => console.error("Erro ao buscar artigos salvos:", err));
+  }, []);
 
-      if (data.articles.length === 0) {
-        break;
-      }
-
-      for (const article of data.articles) {
-        if (!seen.has(article.url)) {
-          combined.push(article);
-          seen.add(article.url);
-          added += 1;
-          if (added >= PAGE_SIZE) break;
-        }
-      }
-
-      if (added < PAGE_SIZE) {
-        page += 1;
-      }
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchSavedArticles();
+    } else {
+      setSavedArticles([]);
     }
+  }, [isLoggedIn, fetchSavedArticles]);
 
-    return { combined, page, total };
-  };
+
   
   const handleSigninClick = () => {
+    setAuthError("");
     setIsLoginPopupOpen(true);
   };
 
   const handleGoHome = () => {
-    setArticles([]);
+    setAllArticles([]);
+    setVisibleCount(CARDS_PER_PAGE);
     setHasSearched(false);
     setHasError(false);
     setErrorMessage("");
-    setTotalResults(0);
-    setCurrentPage(1);
     setCurrentQuery("");
     setIsLoading(false);
-    setIsLoadingMore(false);
   };
 
   const handleOpenRegister = () => {
+    setAuthError("");
     setIsLoginPopupOpen(false);
     setIsRegisterPopupOpen(true);
   };
 
   const handleOpenLogin = () => {
+    setAuthError("");
     setIsRegisterPopupOpen(false);
     setIsLoginPopupOpen(true);
   };
 
   const handleClosePopup = () => {
+    setAuthError("");
     setIsLoginPopupOpen(false);
     setIsRegisterPopupOpen(false);
     setIsSuccessPopupOpen(false);
   };
 
   const handleLogin = (email: string, password: string) => {
-    console.log("Login:", email, password);
-    setIsLoginPopupOpen(false);
+    setAuthError("");
+    signin(email, password)
+      .then(() => getUserInfo())
+      .then((user) => {
+        setCurrentUser(user);
+        setIsLoggedIn(true);
+        setIsLoginPopupOpen(false);
+      })
+      .catch((err) => {
+        setAuthError(err.message || "Erro ao fazer login.");
+      });
   };
 
   const handleRegister = (email: string, password: string, username: string) => {
-    console.log("Register:", email, password, username);
-    setIsRegisterPopupOpen(false);
-    setIsSuccessPopupOpen(true);
+    setAuthError("");
+    signup(email, password, username)
+      .then(() => {
+        setIsRegisterPopupOpen(false);
+        setIsSuccessPopupOpen(true);
+      })
+      .catch((err) => {
+        setAuthError(err.message || "Erro ao cadastrar.");
+      });
   };
 
-  const handleSearch = async (query: string) => {
-    try {
-      setHasSearched(true);
-      setHasError(false);
-      setErrorMessage("");
-      setIsLoading(true);
-      setIsLoadingMore(false);
-      setCurrentQuery(query);
-      setCurrentPage(1);
-      setArticles([]);
-      const filled = await loadChunk(query, 1, [], 0);
-      setArticles(filled.combined);
-      setTotalResults(filled.total);
-      setCurrentPage(filled.page);
-      console.log('Artigos encontrados:', filled.combined.length);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Erro ao buscar noticias.";
-      setHasError(true);
-      setErrorMessage(message);
-      console.error('Erro ao buscar notícias:', error);
-    } finally {
-      setIsLoading(false);
-    }
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    signout()
+      .catch(() => {})
+      .finally(() => {
+        setCurrentUser(null);
+        setIsLoggedIn(false);
+        setSavedArticles([]);
+        navigate("/");
+      });
   };
 
-  const handleLoadMore = async () => {
-    try {
-      if (isLoadingMore || !currentQuery) return;
-      setIsLoadingMore(true);
-      const nextPage = currentPage + 1;
-      const filled = await loadChunk(currentQuery, nextPage, articles, totalResults);
-      setArticles(filled.combined);
-      setCurrentPage(filled.page);
-      setTotalResults(filled.total);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Erro ao carregar mais noticias.";
-      setHasError(true);
-      setErrorMessage(message);
-      console.error('Erro ao carregar mais notícias:', error);
-    } finally {
-      setIsLoadingMore(false);
-    }
+  const handleSaveArticle = (article: Article) => {
+    if (!isLoggedIn) return;
+    saveArticle({
+      keyword: currentQuery || "geral",
+      title: article.title || "Sem título",
+      text: article.description || article.content || "Sem descrição",
+      date: article.publishedAt || new Date().toISOString(),
+      source: article.source?.name || "Desconhecido",
+      link: article.url,
+      image: article.urlToImage || "",
+    })
+      .then((saved) => {
+        setSavedArticles((prev) => [...prev, saved]);
+      })
+      .catch((err) => console.error("Erro ao salvar artigo:", err));
   };
 
-  const hasMore = articles.length < totalResults;
+  const handleDeleteArticle = (articleId: string) => {
+    if (!isLoggedIn) return;
+    deleteArticle(articleId)
+      .then(() => {
+        setSavedArticles((prev) => prev.filter((a) => a._id !== articleId));
+      })
+      .catch((err) => console.error("Erro ao remover artigo:", err));
+  };
+
+  const handleSearch = (query: string) => {
+    setHasSearched(true);
+    setHasError(false);
+    setErrorMessage("");
+    setIsLoading(true);
+    setCurrentQuery(query);
+    setAllArticles([]);
+    setVisibleCount(CARDS_PER_PAGE);
+
+    searchNews(query)
+      .then((data) => {
+        setAllArticles(data.articles);
+      })
+      .catch((error) => {
+        const message = error instanceof Error ? error.message : "Erro ao buscar noticias.";
+        setHasError(true);
+        setErrorMessage(message);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + CARDS_PER_PAGE);
+  };
+
+  const articles = allArticles.slice(0, visibleCount);
+  const hasMore = visibleCount < allArticles.length;
   
   return (
+    <CurrentUserContext.Provider value={{ currentUser, isLoggedIn }}>
     <div className="page">
       <Routes>
         <Route 
@@ -168,7 +207,7 @@ function App() {
               <Header 
                 isLoggedIn={isLoggedIn} 
                 handleSigninClick={handleSigninClick}
-                showingSavedArticles={false}
+                handleLogout={handleLogout}
                 onSearch={handleSearch}
                 onHomeClick={handleGoHome}
               />
@@ -180,9 +219,11 @@ function App() {
                 hasSearched={hasSearched}
                 hasMore={hasMore}
                 onLoadMore={handleLoadMore}
-                isLoadingMore={isLoadingMore}
                 hasError={hasError}
                 errorMessage={errorMessage}
+                savedArticles={savedArticles}
+                onSaveArticle={handleSaveArticle}
+                onDeleteArticle={handleDeleteArticle}
               />
             </>
           } 
@@ -194,30 +235,42 @@ function App() {
               <SavedNews
                 isLoggedIn={isLoggedIn}
                 handleSigninClick={handleSigninClick}
+                handleLogout={handleLogout}
+                savedArticles={savedArticles}
+                onDeleteArticle={handleDeleteArticle}
               />
             </>
           } 
         />
       </Routes>
       <Footer />
-      <LoginPopup 
-        isOpen={isLoginPopupOpen} 
-        onClose={handleClosePopup}
-        onLogin={handleLogin}
-        onSwitchToRegister={handleOpenRegister}
-      />
-      <RegisterPopup
-        isOpen={isRegisterPopupOpen}
-        onClose={handleClosePopup}
-        onSwitchToLogin={handleOpenLogin}
-        onRegister={handleRegister}
-      />
-      <SuccessRegisterPopup
-        isOpen={isSuccessPopupOpen}
-        onClose={handleClosePopup}
-        onGoToLogin={handleOpenLogin}
-      />
+      {isLoginPopupOpen && (
+        <LoginPopup 
+          isOpen={isLoginPopupOpen} 
+          onClose={handleClosePopup}
+          onLogin={handleLogin}
+          onSwitchToRegister={handleOpenRegister}
+          errorMessage={authError}
+        />
+      )}
+      {isRegisterPopupOpen && (
+        <RegisterPopup
+          isOpen={isRegisterPopupOpen}
+          onClose={handleClosePopup}
+          onSwitchToLogin={handleOpenLogin}
+          onRegister={handleRegister}
+          errorMessage={authError}
+        />
+      )}
+      {isSuccessPopupOpen && (
+        <SuccessRegisterPopup
+          isOpen={isSuccessPopupOpen}
+          onClose={handleClosePopup}
+          onGoToLogin={handleOpenLogin}
+        />
+      )}
     </div>
+    </CurrentUserContext.Provider>
   );
 }
 
